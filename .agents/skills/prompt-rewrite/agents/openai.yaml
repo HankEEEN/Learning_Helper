@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prompt Rewrite"
+  short_description: "Rewrite rough prompts into clear instructions."
+  default_prompt: "Use $prompt-rewrite to rewrite this prompt while preserving my intent and preferences."

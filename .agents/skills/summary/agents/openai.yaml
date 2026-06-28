@@ -1,0 +1,4 @@
+interface:
+  display_name: "Summary"
+  short_description: "Summarize content into useful formats."
+  default_prompt: "Use $summary to summarize this content in the most useful format."
