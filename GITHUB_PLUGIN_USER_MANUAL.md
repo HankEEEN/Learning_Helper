@@ -66,9 +66,165 @@ Less useful prompt:
 Help with GitHub.
 ```
 
+## GitHub Workflow Concepts Before The Examples
+
+Before using the GitHub Plugin, it helps to understand the main GitHub objects you will see in common workflows.
+
+### Repository
+
+A repository is the project container on GitHub. It stores code, branches, issues, pull requests, discussions, releases, and project history.
+
+Use a repository when you want Codex to understand the project as a whole:
+
+```text
+Use GitHub to summarize this repository: open issues, open PRs, recent activity, and what needs attention.
+```
+
+Codex can use the GitHub Plugin to inspect repository-level information, while local `git` handles the files in your checkout.
+
+### Issue
+
+An issue is a task, bug report, feature request, question, or planning item. Think of it as the "what needs to be done" record.
+
+Use an issue when:
+
+- You want to describe a bug or feature before coding.
+- You want to discuss requirements before implementation.
+- You want a trackable task that can later be linked to a PR.
+- You want Codex to use the issue as the source of truth for a change.
+
+Beginner example:
+
+```text
+Use GitHub issue #12 as context. Summarize the request, list acceptance criteria, and propose a small implementation plan. Do not edit files yet.
+```
+
+Typical issue-to-code flow:
+
+1. Create or inspect an issue.
+2. Understand the requested change.
+3. Create a branch locally.
+4. Implement the change.
+5. Open a PR that references the issue.
+
+### Branch
+
+A branch is a separate line of work in Git. It lets you make changes without directly changing `main` or `master`.
+
+Use a branch when:
+
+- You are starting a feature or bug fix.
+- You want your changes isolated from stable code.
+- You plan to open a pull request.
+
+Common beginner branch pattern:
+
+```bash
+git checkout -b codex/fix-issue-12
+```
+
+When using Codex, you can ask:
+
+```text
+If I am on main or master, create a new branch named codex/fix-issue-12 before editing. Otherwise stay on the current feature branch.
+```
+
+### Commit
+
+A commit is a saved snapshot of your local changes. It should represent a logical unit of work.
+
+Use a commit when:
+
+- You have finished a small coherent change.
+- Tests or checks pass, or you have documented what could not be verified.
+- You are ready to push the change to GitHub.
+
+Before committing, ask Codex to check scope:
+
+```text
+Run git status and git diff. Tell me which files changed and whether anything looks unrelated before staging.
+```
+
+### Pull Request
+
+A pull request, often called a PR, is a request to merge one branch into another branch on GitHub. In most workflows, you push a feature branch and open a PR into `main`.
+
+Think of a PR as the review and collaboration space for a code change. It usually contains:
+
+- The code diff.
+- A description of what changed and why.
+- Review comments.
+- CI check results.
+- Discussion about whether the change is ready to merge.
+
+Use a PR when:
+
+- You want someone to review your code before merging.
+- You want CI checks to run on your branch.
+- You want a visible record of why a change was made.
+- You want Codex to inspect comments, changed files, and test status.
+
+Beginner tip: open a **draft PR** when you want feedback but are not ready to merge yet.
+
+Prompt:
+
+```text
+Open a draft pull request for this branch. In the PR body, include what changed, why it changed, how it was tested, and what still needs review.
+```
+
+### Review Comments
+
+Review comments are feedback left on a PR. They may ask for code changes, request clarification, or simply discuss design choices.
+
+Not every comment requires a code change. Codex should separate:
+
+- Actionable comments: require a change.
+- Discussion-only comments: require a reply or decision.
+- Resolved comments: already handled.
+- Conflicting comments: need your judgment before editing.
+
+Prompt:
+
+```text
+Use GitHub to inspect unresolved review comments on this PR. Separate actionable comments from discussion-only comments, then wait for my approval before editing.
+```
+
+### CI Checks And GitHub Actions
+
+CI checks are automated tests or validations that run on GitHub. GitHub Actions is GitHub's built-in CI system.
+
+Use CI checks when:
+
+- You want to know whether the code builds.
+- You want tests to pass before merging.
+- You want Codex to debug a failing PR check.
+
+The GitHub Plugin can inspect PR context, but Codex usually needs `gh` to read GitHub Actions logs.
+
+Prompt:
+
+```text
+Inspect the failing GitHub Actions checks on this PR. Use GitHub for PR context and gh for logs. Summarize the failure and propose a fix before editing.
+```
+
+### How These Pieces Fit Together
+
+A common GitHub workflow looks like this:
+
+1. **Issue** records the task.
+2. **Branch** isolates the work.
+3. **Commits** save local progress.
+4. **Push** uploads the branch to GitHub.
+5. **Pull request** asks to merge the branch.
+6. **Review comments** improve the change.
+7. **CI checks** verify the change.
+8. **Merge** brings the work into the main branch.
+
+Codex and the GitHub Plugin help mostly with steps 1, 5, 6, and 7. Local `git` handles steps 2, 3, 4, and merge/rebase operations.
+
 ## Common Workflow 1: Understand A GitHub Issue Before Coding
 
-Use this when you have an issue and want Codex to explain what needs to be done.
+Use this when an issue already describes the bug, feature, or task. The issue should explain what needs to be done; Codex helps translate it into an implementation plan.
 
 Prompt:
 
@@ -92,7 +248,7 @@ Proceed with the implementation. Keep the change small, then run the relevant ch
 
 ## Common Workflow 2: Make A Local Code Change With GitHub Context
 
-Use this when the GitHub issue or PR explains the task, but edits happen locally.
+Use this when GitHub has the task context, usually in an issue or PR, but the actual code changes happen in your local checkout.
 
 Prompt:
 
@@ -116,7 +272,7 @@ Before committing, run git status and show me which files changed. Do not stage 
 
 ## Common Workflow 3: Review Local Changes Before Committing
 
-Use this when you already changed files locally.
+Use this when you already changed files locally and want to check whether the diff is clean before making a commit.
 
 Prompt:
 
@@ -140,7 +296,7 @@ Only stage the files related to this feature. Leave unrelated local edits untouc
 
 ## Common Workflow 4: Commit, Push, And Open A Draft Pull Request
 
-Use this when the local change is ready to upload to GitHub.
+Use this when your local change is ready to become a GitHub collaboration item. The commit saves your work locally, the push uploads your branch, and the draft PR creates a place for review and CI.
 
 Prompt:
 
@@ -170,7 +326,7 @@ In the PR body, include: what changed, why it changed, how I tested it, and anyt
 
 ## Common Workflow 5: Review A Pull Request
 
-Use this when you want Codex to help understand a PR.
+Use this when a branch has already been pushed and a PR exists. The PR is the right place to review the diff, discussion, test status, and merge readiness.
 
 Prompt:
 
@@ -194,7 +350,7 @@ What Codex should do:
 
 ## Common Workflow 6: Address Pull Request Review Comments
 
-Use this when someone reviewed your PR and requested changes.
+Use this when someone reviewed your PR and left feedback. Codex should first classify comments before editing, because some comments require code changes while others only require discussion.
 
 Prompt:
 
@@ -218,7 +374,7 @@ Draft a polite GitHub reply explaining why this review comment does not require 
 
 ## Common Workflow 7: Debug Failing GitHub Actions
 
-Use this when your PR has failing checks.
+Use this when your PR has failing checks. The PR tells you which checks failed; `gh` helps Codex inspect the detailed GitHub Actions logs.
 
 Prompt:
 
@@ -443,4 +599,3 @@ For most tasks, use this sequence:
 10. Ask Codex to open a draft PR.
 11. Ask Codex to inspect review comments and CI results.
 12. Repeat with follow-up fixes if needed.
-
